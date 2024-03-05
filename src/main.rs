@@ -2,7 +2,7 @@ use gilrs::{Axis, Button, Gilrs, GilrsBuilder};
 use integer_sqrt::IntegerSquareRoot;
 
 
-pub fn calc_motors(inp: &[i32; 4]) -> [i32; 4] {
+pub fn calc_motors(inp: &[i32; 4]) -> [u16; 4] {
     // input array
     // lift, roll, pitch, yaw
     //      Z,      L,      M,      N
@@ -10,35 +10,40 @@ pub fn calc_motors(inp: &[i32; 4]) -> [i32; 4] {
     //ae2 -0.25	    -0.5	0	    0.25
     //ae3 -0.25	    0	    -0.5	-0.25
     //ae4 -0.25	    0.5	    0	    0.25
-
-    let b = 1; // ????
+	
+	let max_rpm = 400;
+    let b = 3; // ????
     let d = 1; // ????
 
-    let a1 = (-25 * inp[0] + 50 * inp[2]) / b - (25 * inp[3]) / d;
-    let a2 = (-25 * inp[0] - 50 * inp[1]) / b + (25 * inp[3]) / d;
-    let a3 = (-25 * inp[0] - 50 * inp[2]) / b - (25 * inp[3]) / d;
-    let a4 = (-25 * inp[0] + 50 * inp[1]) / b + (25 * inp[3]) / d;
+    let a1 = (-250 * inp[0] - 500 * inp[2]) / b - (250 * inp[3]) / d;
+    let a2 = (-250 * inp[0] - 500 * inp[1]) / b + (250 * inp[3]) / d;
+    let a3 = (-250 * inp[0] + 500 * inp[2]) / b - (250 * inp[3]) / d;
+    let a4 = (-250 * inp[0] + 500 * inp[1]) / b + (250 * inp[3]) / d;
 
-    // let mut ae1: i32 = 0;
-    // let mut ae2: i32 = 0;
-    // let mut ae3: i32 = 0;
-    // let mut ae4: i32 = 0;
+    let mut ae1: i32 = 0;
+    let mut ae2: i32 = 0;
+    let mut ae3: i32 = 0;
+    let mut ae4: i32 = 0;
     
-    // if a1 > 0 {
-    //     ae1 = a1.integer_sqrt();
-    // }
-    // if a2 > 0 {
-    //     ae2 = a2.integer_sqrt();
-    // }
-    // if a3 > 0 {
-    //     ae3 = a3.integer_sqrt();
-    // }
-    // if a4 > 0 {
-    //     ae4 = a4.integer_sqrt();
-    // }
+    if a1 > 0 {
+        ae1 = a1.integer_sqrt();
+		if ae1 > max_rpm {ae1 = max_rpm;}
+    }
+    if a2 > 0 {
+        ae2 = a2.integer_sqrt();
+		if ae2 > max_rpm {ae2 = max_rpm;}
+    }
+    if a3 > 0 {
+        ae3 = a3.integer_sqrt();
+		if ae3 > max_rpm {ae3 = max_rpm;}
+    }
+    if a4 > 0 {
+        ae4 = a4.integer_sqrt();
+		if ae4 > max_rpm {ae4 = max_rpm;}
+    }
 
-    // [u16::try_from(ae1).ok().unwrap(), u16::try_from(ae2).ok().unwrap(), u16::try_from(ae3).ok().unwrap(), u16::try_from(ae4).ok().unwrap()]
-    [a1, a2, a3, a4]
+    [u16::try_from(ae1).ok().unwrap(), u16::try_from(ae2).ok().unwrap(), u16::try_from(ae3).ok().unwrap(), u16::try_from(ae4).ok().unwrap()]
+    //[ae1, ae2, ae3, ae4]
 }
 
 
@@ -73,7 +78,7 @@ impl Joystick {
 		let yaw = (z * 10.0) as i32;
 		let mut throttle = 0;
 		if self.throttle > 0.01 {
-			throttle = (self.throttle * 1000.0) as i32;
+			throttle = -(self.throttle * 2000.0) as i32;
 		}
 
 		(yaw, pitch, roll, throttle)

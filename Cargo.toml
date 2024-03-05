@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 gilrs = "0.10.4"
+integer-sqrt = "0.1.5"
